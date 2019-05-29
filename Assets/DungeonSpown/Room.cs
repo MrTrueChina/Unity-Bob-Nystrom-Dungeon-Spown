@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Room
+public class Room : Zone
 {
     Quad[,] _quads;
     Rect _rect;
@@ -38,5 +38,24 @@ public class Room
     public bool AdjoinsOrOverlaps(Rect rect)
     {
         return new Rect(_rect.x - 1, _rect.y - 1, _rect.width + 2, _rect.height + 2).Overlaps(rect);
+    }
+
+    public Quad[] GetQuads()
+    {
+        int width = _quads.GetLength(0);
+        int height = _quads.GetLength(1);
+
+        Quad[] quadArray = new Quad[width*height];
+
+        for (int x = 0; x < width; x++)
+            for (int y = 0; y < height; y++)
+                quadArray[x + y * width] = _quads[x, y];
+
+        return quadArray;
+    }
+
+    public bool Contains(Quad quad)
+    {
+        throw new System.NotImplementedException();
     }
 }

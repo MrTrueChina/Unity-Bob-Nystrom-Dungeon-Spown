@@ -51,6 +51,11 @@ public class Map
         _quads[x, y].quadType = type;
     }
 
+    public QuadType GetQuadType(Vector2 position)
+    {
+        return GetQuadType((int)position.x, (int)position.y);
+    }
+
     public QuadType GetQuadType(int x, int y)
     {
         return _quads[x, y].quadType;

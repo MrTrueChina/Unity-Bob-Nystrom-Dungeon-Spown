@@ -9,10 +9,15 @@ public class DungeonSpowner
     /// 填充迷宫时相邻节点之间的距离
     /// </summary>
     const int NODE_DISTANCE = 2;
+    /// <summary>
+    /// 检测能否生成连接点时最长的检测距离，算法设计每个区域最远隔着2厚度的墙，检测到3就可以知道是否能走到空地
+    /// </summary>
+    const int MAX_CHECK_SPOWN_CONNECT_POINT_DISTANCE = 3;
     SpownData _spownData;
     Map _map;
     List<Room> _rooms = new List<Room>();
     List<Maze> _mazes = new List<Maze>();
+    bool[,] _connectPoints;
     List<Vector2> _carvedNodes = new List<Vector2>();
     List<Vector2> _readyToCarveNodes = new List<Vector2>();
     Vector2 _entrancePosition;
@@ -292,7 +297,104 @@ public class DungeonSpowner
 
     void Connect()
     {
-        //TODO：连接迷宫和房间
+        /*
+         *  生成连接点
+         *  连接房间
+         */
+        SpownConnectPoints();
+        DoConnect();
+    }
+
+    void SpownConnectPoints()
+    {
+        /*
+         *  初始化连接点数组
+         *  
+         *  遍历所有区域
+         *      生成这个区域的连接点
+         */
+        SetupConnectPoints();
+
+        foreach (Zone zone in _rooms)
+            SpownZoneConnectPoint(zone);
+        foreach (Zone zone in _mazes)
+            SpownZoneConnectPoint(zone);
+    }
+
+    void SetupConnectPoints()
+    {
+        _connectPoints = new bool[_map.width, _map.height];
+
+        for (int x = 0; x < _map.width; x++)
+            for (int y = 0; y < _map.height; y++)
+                _connectPoints[x, y] = false;
+    }
+
+    void SpownZoneConnectPoint(Zone zone)
+    {
+        /*
+         *  遍历所有地块
+         *      生成这个地块的连接点
+         */
+        foreach (Quad quad in zone.GetQuads())
+            SpownAQuadConnectPoint(zone, quad);
+    }
+
+    void SpownAQuadConnectPoint(Zone zone, Quad quad)
+    {
+        /*
+         *  遍历上下左右
+         *      生成一个方向的连接点
+         */
+        SpownADirectionConnectPoint(zone, quad, Vector2.up);
+        SpownADirectionConnectPoint(zone, quad, Vector2.right);
+        SpownADirectionConnectPoint(zone, quad, Vector2.down);
+        SpownADirectionConnectPoint(zone, quad, Vector2.left);
+    }
+
+    void SpownADirectionConnectPoint(Zone zone, Quad quad, Vector2 direction)
+    {
+        /*
+         *  if(这个方向能生成连接点)
+         *      生成这个方向的连接点
+         */
+        if (CanSpownConnectPoint(zone, quad, direction))
+            DoSpownADirectionConnectPoint(quad, direction);
+    }
+
+    bool CanSpownConnectPoint(Zone zone, Quad quad, Vector2 direction)
+    {
+        /*
+         *  向前走最长检测距离
+         *      if(遇到了空地 && 至少走了一步 && 这个空地不是自己区域的)
+         *          true
+         *  false
+         */
+        for (int step = 1; step < MAX_CHECK_SPOWN_CONNECT_POINT_DISTANCE; step++)
+            if (_map.GetQuadType(quad.position + direction * step) != QuadType.WALL && step > 1 && !zone.Contains(_map.GetQuad(quad.position + direction * step)))
+                return true;
+        return false;
+    }
+
+    void DoSpownADirectionConnectPoint(Quad quad, Vector2 direction)
+    {
+        /*
+         *  循环到走到空地为止
+         *      生成连接点
+         */
+        Vector2 currentPosition;
+        for (int step = 1; _map.GetQuadType((currentPosition = quad.position + direction * step)) == QuadType.WALL; step++)
+            AddConnectPoint(currentPosition);
+    }
+
+    void AddConnectPoint(Vector2 position)
+    {
+        _connectPoints[(int)position.x, (int)position.y] = true;
+    }
+
+    void DoConnect()
+    {
+        //TODO：连接
     }
 
     void AntiCarve()
