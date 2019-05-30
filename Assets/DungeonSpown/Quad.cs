@@ -6,7 +6,7 @@ public class Quad
 {
     public Vector2 position
     {
-        get { return position; }
+        get { return _position; }
     }
     Vector2 _position;
     public QuadType quadType

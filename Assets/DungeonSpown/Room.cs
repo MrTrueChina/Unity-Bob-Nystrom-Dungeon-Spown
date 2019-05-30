@@ -56,6 +56,9 @@ public class Room : Zone
 
     public bool Contains(Quad quad)
     {
-        throw new System.NotImplementedException();
+        foreach (Quad thisQuad in _quads)
+            if (thisQuad == quad)
+                return true;
+        return false;
     }
 }

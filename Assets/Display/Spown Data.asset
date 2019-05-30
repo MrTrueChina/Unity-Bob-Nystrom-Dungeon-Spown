@@ -12,5 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2105d99408b27a5459312ed93246ee6b, type: 3}
   m_Name: Spown Data
   m_EditorClassIdentifier: 
-  _width: 30
-  _height: 20
+  _width: 60
+  _height: 40
+  _spownRoomTime: 1
+  _minRoomWidth: 4
+  _maxRoomWidth: 6
+  _minRoomHeight: 4
+  _maxRoomHeight: 6
