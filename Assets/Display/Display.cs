@@ -21,14 +21,17 @@ public class Display : MonoBehaviour
     Sprite GetMapSprite()
     {
         /*
-         *  获取图片
          *  获取地图
+         *  获取图片
          *  绘制
          *  转为Sprite返回
          */
-        Texture2D texture = GetTexture();
         Map map = new DungeonSpowner().SpownMap(_spownData, GetEntrancePosition());
+
+        Texture2D texture = GetTexture();
+
         DrawTexture(texture, map);
+
         return Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), Vector2.zero);
     }
 

@@ -550,10 +550,10 @@ public class DungeonSpowner
          *      else
          *          返回这个地块所属的区域
          */
-        for (Vector2 currentPosition = connectPoint + direction; ; currentPosition += direction)
+        for (Vector2 currentPosition = connectPoint; ; currentPosition += direction)
         {
-            Debug.Log("AAA");
-            if (IsConnectPoint(currentPosition))            
+            //Debug.Log("移除连接点，当前位置：" + currentPosition);
+            if (IsConnectPoint(currentPosition))
                 BreakWallAndClearConnectPoint(currentPosition);
             else
                 return GetZone(_map.GetQuad(currentPosition));
@@ -562,7 +562,7 @@ public class DungeonSpowner
 
     void BreakWallAndClearConnectPoint(Vector2 position)
     {
-        Debug.Log("打穿墙并移除连接点");
+        //Debug.Log("打穿墙并移除连接点");
         _map.SetQuadType(position, QuadType.FLOOR);
         RemoveConnectPoint(position);
     }
