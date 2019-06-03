@@ -21,4 +21,9 @@ public class Quad
         _position = position;
         _quadType = quadType;
     }
+
+    public override string ToString()
+    {
+        return "Quad[" + position + "," + quadType + "]";
+    }
 }

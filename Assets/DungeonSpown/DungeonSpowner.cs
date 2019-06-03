@@ -49,7 +49,7 @@ public class DungeonSpowner
         SpownRooms();
         FillMaze();
         Connect();
-        AntiCarve();
+        Uncarve();
     }
 
     void SetupMap()
@@ -360,11 +360,7 @@ public class DungeonSpowner
          *      生成这个方向的连接点
          */
         if (CanSpownConnectPoint(zone, quad, direction))
-        {
-            //Debug.Log("可以生成连接点");
-            //TODO：问题不在检测能否生成连接点
             DoSpownADirectionConnectPoint(quad, direction);
-        }
     }
 
     bool CanSpownConnectPoint(Zone zone, Quad quad, Vector2 direction)
@@ -419,8 +415,6 @@ public class DungeonSpowner
 
     void AddConnectPoint(Vector2 position)
     {
-        //Debug.Log("生成连接点");
-        //TODO：生成连接点的数量是对的
         _connectPoints[(int)position.x, (int)position.y] = true;
     }
 
@@ -480,7 +474,8 @@ public class DungeonSpowner
         HashSet<Vector2> connectPointsContiguousMainZone = new HashSet<Vector2>();
 
         foreach (Quad quad in _mainZone)
-            connectPointsContiguousMainZone.UnionWith(GetContiguousConnectPoints(quad.position)); //TODO：这个UnionWith可能有错
+            connectPointsContiguousMainZone.UnionWith(GetContiguousConnectPoints(quad.position));
+        //UnionWith(IEnumerable)：将参数 IEnumerable 里的元素合并进调用的 Set 里，相当于Set版的AddRange
 
         return new List<Vector2>(connectPointsContiguousMainZone);
     }
@@ -655,8 +650,79 @@ public class DungeonSpowner
         return null;
     }
 
-    void AntiCarve()
+    void Uncarve()
     {
-        //TODO：反雕刻
+        /*
+         *  while(还有能反雕刻的地块)
+         *      反雕刻一串地块
+         */
+
+        Quad canAntiCarveQuad;
+        while ((canAntiCarveQuad = GetCanUncarveQuad()) != null)
+            UncarveALine(canAntiCarveQuad);
+    }
+
+    Quad GetCanUncarveQuad()
+    {
+        /*
+         *  遍历所有地块
+         *      if(可以反雕刻)
+         *          return
+         *  return null
+         */
+        foreach (Quad quad in _map.GetQuadArray())
+            if (CanUncarve(quad))
+                return quad;
+        return null;
+    }
+
+    bool CanUncarve(Quad quad)
+    {
+        /*
+         *  自己不是墙、上下左右至少三面是墙则说明可以反雕刻
+         */
+        if (quad.quadType == QuadType.WALL)
+            return false;
+
+        int wallNumber = 0;
+        if (_map.GetQuadType(quad.position + Vector2.up) == QuadType.WALL)
+            wallNumber++;
+        if (_map.GetQuadType(quad.position + Vector2.right) == QuadType.WALL)
+            wallNumber++;
+        if (_map.GetQuadType(quad.position + Vector2.down) == QuadType.WALL)
+            wallNumber++;
+        if (_map.GetQuadType(quad.position + Vector2.left) == QuadType.WALL)
+            wallNumber++;
+
+        return wallNumber >= 3;
+    }
+
+    void UncarveALine(Quad quad)
+    {
+        /*
+         *  反雕刻这个地块
+         *  while(相邻的地块里有可以反雕刻的地块)
+         *      转移反雕刻地块到那个地块，再次反雕刻
+         */
+        Quad currentQuad = quad;
+        while (currentQuad != null)
+        {
+            currentQuad.quadType = QuadType.WALL;
+            currentQuad = GetContiguousCanUncarveNode(quad.position);
+        }
+    }
+
+    Quad GetContiguousCanUncarveNode(Vector2 centerPosition)
+    {
+        /*
+         *  遍历相邻的地块
+         *      if(可以雕刻)
+         *          return
+         *  return null
+         */
+        foreach (Quad quad in GetContiguousQuads(centerPosition))
+            if (CanUncarve(quad))
+                return quad;
+        return null;
     }
 }

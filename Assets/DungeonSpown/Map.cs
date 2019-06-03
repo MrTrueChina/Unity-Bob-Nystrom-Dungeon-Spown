@@ -36,12 +36,22 @@ public class Map
         return GetQuad((int)position.x, (int)position.y);
     }
 
-    public Quad GetQuad(int x,int y)
+    public Quad GetQuad(int x, int y)
     {
         return _quads[x, y];
     }
 
-    public void SetQuadType(Vector2 position,QuadType type)
+    public Quad[] GetQuadArray()
+    {
+        List<Quad> quads = new List<Quad>();
+
+        foreach (Quad quad in _quads)
+            quads.Add(quad);
+
+        return quads.ToArray();
+    }
+
+    public void SetQuadType(Vector2 position, QuadType type)
     {
         SetQuadType((int)position.x, (int)position.y, type);
     }
@@ -66,7 +76,7 @@ public class Map
         return Contains((int)position.x, (int)position.y);
     }
 
-    public bool Contains(int x,int y)
+    public bool Contains(int x, int y)
     {
         return x >= 0 && x < width && y >= 0 && y < height;
     }
