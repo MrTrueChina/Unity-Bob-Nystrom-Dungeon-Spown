@@ -19,3 +19,4 @@ MonoBehaviour:
   _maxRoomWidth: 12
   _minRoomHeight: 4
   _maxRoomHeight: 12
+  _roomDoorNumberProbability: 000000000400000001000000
