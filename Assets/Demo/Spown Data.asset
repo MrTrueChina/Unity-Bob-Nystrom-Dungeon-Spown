@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _width: 60
   _height: 40
-  _spownRoomTime: 20
+  _spownRoomTime: 80
   _minRoomWidth: 4
   _maxRoomWidth: 12
   _minRoomHeight: 4

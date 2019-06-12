@@ -522,6 +522,8 @@ public class DungeonSpowner
          */
         Vector2 mainZoneQuadPosition = GetContiguousMainZoneQuad(connectPoint).position;
         ConnectZoneAndClearConnectPointByConnectPointAndDirection(connectPoint, (connectPoint - mainZoneQuadPosition));
+
+        //TODO：对于房间开多个门的工作也在这里进行
     }
 
     void ConnectZoneAndClearConnectPointByConnectPointAndDirection(Vector2 connectPoint, Vector2 direction)

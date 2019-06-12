@@ -5,8 +5,10 @@ using UnityEngine.UI;
 
 public class Display : MonoBehaviour
 {
+#pragma warning disable 0649
     [SerializeField]
     Image _displayImage;
+#pragma warning disable 0649
     [SerializeField]
     SpownData _spownData;
 
