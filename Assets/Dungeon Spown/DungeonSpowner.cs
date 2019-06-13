@@ -18,7 +18,7 @@ public class DungeonSpowner
     List<Room> _rooms = new List<Room>();
     List<Maze> _mazes = new List<Maze>();
     List<Quad> _mainZone = new List<Quad>();
-    bool[,] _connectPoints;
+    ConnectPointMap _connectPointMap;
     List<Vector2> _carvedNodes = new List<Vector2>();
     List<Vector2> _readyToCarveNodes = new List<Vector2>();
     Vector2 _entrancePosition;
@@ -299,36 +299,32 @@ public class DungeonSpowner
     void Connect()
     {
         /*
+         *  初始化连接点地图
          *  生成连接点
-         *  连接房间
+         *  进行连接
+         *  进行额外的连接
          */
+        SetupConnectPointMap();
         SpownConnectPoints();
         DoConnect();
+        ///TODO：进行额外的连接
+    }
+
+    void SetupConnectPointMap()
+    {
+        _connectPointMap = new ConnectPointMap(_spownData.width, _spownData.height);
     }
 
     void SpownConnectPoints()
     {
         /*
-         *  初始化连接点数组
-         *  
          *  遍历所有区域
          *      生成这个区域的连接点
          */
-        SetupConnectPoints();
-
         foreach (Zone zone in _rooms)
             SpownZoneConnectPoint(zone);
         foreach (Zone zone in _mazes)
             SpownZoneConnectPoint(zone);
-    }
-
-    void SetupConnectPoints()
-    {
-        _connectPoints = new bool[_map.width, _map.height];
-
-        for (int x = 0; x < _map.width; x++)
-            for (int y = 0; y < _map.height; y++)
-                _connectPoints[x, y] = false;
     }
 
     void SpownZoneConnectPoint(Zone zone)
@@ -388,18 +384,13 @@ public class DungeonSpowner
 
             Quad currentQuad = _map.GetQuad(currentPosition);
 
-            if (IsConnectPoint(currentQuad.position))
+            if (_connectPointMap.IsConnectToUnconnectedZone(currentQuad.position))
                 return false;
 
             if (currentQuad.quadType != QuadType.WALL && step > 1 && !zone.Contains(currentQuad))
                 return true;
         }
         return false;
-    }
-
-    bool IsConnectPoint(Vector2 position)
-    {
-        return _connectPoints[(int)position.x, (int)position.y];
     }
 
     void DoSpownADirectionConnectPoint(Quad quad, Vector2 direction)
@@ -410,12 +401,7 @@ public class DungeonSpowner
          */
         Vector2 currentPosition;
         for (int step = 1; _map.GetQuadType((currentPosition = quad.position + direction * step)) == QuadType.WALL; step++)
-            AddConnectPoint(currentPosition);
-    }
-
-    void AddConnectPoint(Vector2 position)
-    {
-        _connectPoints[(int)position.x, (int)position.y] = true;
+            _connectPointMap.AddConnectPoint(currentPosition);
     }
 
     void DoConnect()
@@ -490,7 +476,7 @@ public class DungeonSpowner
         List<Vector2> connectPoints = new List<Vector2>();
 
         foreach (Quad quad in GetContiguousQuads(center))
-            if (IsConnectPoint(quad.position))
+            if (_connectPointMap.IsConnectToUnconnectedZone(quad.position))
                 connectPoints.Add(quad.position);
 
         return connectPoints;
@@ -522,8 +508,6 @@ public class DungeonSpowner
          */
         Vector2 mainZoneQuadPosition = GetContiguousMainZoneQuad(connectPoint).position;
         ConnectZoneAndClearConnectPointByConnectPointAndDirection(connectPoint, (connectPoint - mainZoneQuadPosition));
-
-        //TODO：对于房间开多个门的工作也在这里进行
     }
 
     void ConnectZoneAndClearConnectPointByConnectPointAndDirection(Vector2 connectPoint, Vector2 direction)
@@ -549,8 +533,7 @@ public class DungeonSpowner
          */
         for (Vector2 currentPosition = connectPoint; ; currentPosition += direction)
         {
-            //Debug.Log("移除连接点，当前位置：" + currentPosition);
-            if (IsConnectPoint(currentPosition))
+            if (_connectPointMap.IsConnectToUnconnectedZone(currentPosition))
                 BreakWallAndClearConnectPoint(currentPosition);
             else
                 return GetZone(_map.GetQuad(currentPosition));
@@ -561,12 +544,7 @@ public class DungeonSpowner
     {
         //Debug.Log("打穿墙并移除连接点");
         _map.SetQuadType(position, QuadType.FLOOR);
-        RemoveConnectPoint(position);
-    }
-
-    void RemoveConnectPoint(Vector2 position)
-    {
-        _connectPoints[(int)position.x, (int)position.y] = false;
+        _connectPointMap. ChangeConnectPointToConnectToMainZone(position);
     }
 
     Zone GetZone(Quad quad)
@@ -622,7 +600,7 @@ public class DungeonSpowner
          */
         Vector2 currentPosition = quad.position + direction;
 
-        while (IsConnectPoint(currentPosition))
+        while (_connectPointMap.IsConnectToUnconnectedZone(currentPosition))
             currentPosition += direction;
 
         return _mainZone.Contains(_map.GetQuad(currentPosition));
@@ -634,8 +612,8 @@ public class DungeonSpowner
          *  一直朝前走到不是连接点的位置
          *      清除走到位置的连接点
          */
-        for (Vector2 currentPosition = quad.position + direction; IsConnectPoint(currentPosition); currentPosition += direction)
-            RemoveConnectPoint(currentPosition);
+        for (Vector2 currentPosition = quad.position + direction; _connectPointMap.IsConnectToUnconnectedZone(currentPosition); currentPosition += direction)
+            _connectPointMap. ChangeConnectPointToConnectToMainZone(currentPosition);
     }
 
     Quad GetContiguousMainZoneQuad(Vector2 center)
