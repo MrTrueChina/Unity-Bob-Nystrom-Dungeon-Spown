@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Maze : Zone
+public class Maze : Area
 {
     List<Quad> _quads = new List<Quad>();
 

@@ -17,7 +17,7 @@ public class DungeonSpowner
     Map _map;
     List<Room> _rooms = new List<Room>();
     List<Maze> _mazes = new List<Maze>();
-    List<Quad> _mainZone = new List<Quad>();
+    List<Quad> _mainArea = new List<Quad>();
     ConnectPointMap _connectPointMap;
     List<Vector2> _carvedNodes = new List<Vector2>();
     List<Vector2> _readyToCarveNodes = new List<Vector2>();
@@ -321,45 +321,45 @@ public class DungeonSpowner
          *  遍历所有区域
          *      生成这个区域的连接点
          */
-        foreach (Zone zone in _rooms)
-            SpownZoneConnectPoint(zone);
-        foreach (Zone zone in _mazes)
-            SpownZoneConnectPoint(zone);
+        foreach (Area area in _rooms)
+            SpownAreaConnectPoint(area);
+        foreach (Area area in _mazes)
+            SpownAreaConnectPoint(area);
     }
 
-    void SpownZoneConnectPoint(Zone zone)
+    void SpownAreaConnectPoint(Area area)
     {
         /*
          *  遍历所有地块
          *      生成这个地块的连接点
          */
-        foreach (Quad quad in zone.GetQuads())
-            SpownAQuadConnectPoint(zone, quad);
+        foreach (Quad quad in area.GetQuads())
+            SpownAQuadConnectPoint(area, quad);
     }
 
-    void SpownAQuadConnectPoint(Zone zone, Quad quad)
+    void SpownAQuadConnectPoint(Area area, Quad quad)
     {
         /*
          *  遍历上下左右
          *      生成一个方向的连接点
          */
-        SpownADirectionConnectPoint(zone, quad, Vector2.up);
-        SpownADirectionConnectPoint(zone, quad, Vector2.right);
-        SpownADirectionConnectPoint(zone, quad, Vector2.down);
-        SpownADirectionConnectPoint(zone, quad, Vector2.left);
+        SpownADirectionConnectPoint(area, quad, Vector2.up);
+        SpownADirectionConnectPoint(area, quad, Vector2.right);
+        SpownADirectionConnectPoint(area, quad, Vector2.down);
+        SpownADirectionConnectPoint(area, quad, Vector2.left);
     }
 
-    void SpownADirectionConnectPoint(Zone zone, Quad quad, Vector2 direction)
+    void SpownADirectionConnectPoint(Area area, Quad quad, Vector2 direction)
     {
         /*
          *  if(这个方向能生成连接点)
          *      生成这个方向的连接点
          */
-        if (CanSpownConnectPoint(zone, quad, direction))
+        if (CanSpownConnectPoint(area, quad, direction))
             DoSpownADirectionConnectPoint(quad, direction);
     }
 
-    bool CanSpownConnectPoint(Zone zone, Quad quad, Vector2 direction)
+    bool CanSpownConnectPoint(Area area, Quad quad, Vector2 direction)
     {
         /*
          *  向前走最长检测距离
@@ -384,10 +384,10 @@ public class DungeonSpowner
 
             Quad currentQuad = _map.GetQuad(currentPosition);
 
-            if (_connectPointMap.IsConnectToUnconnectedZone(currentQuad.position))
+            if (_connectPointMap.IsConnectToUnconnectedArea(currentQuad.position))
                 return false;
 
-            if (currentQuad.quadType != QuadType.WALL && step > 1 && !zone.Contains(currentQuad))
+            if (currentQuad.quadType != QuadType.WALL && step > 1 && !area.Contains(currentQuad))
                 return true;
         }
         return false;
@@ -412,16 +412,16 @@ public class DungeonSpowner
          *  while(还有和主区域相邻的连接点)
          *      随机选一个连接点进行连接（同时要修改连接点状态为连接到主区域）
          */
-        AddToMainZone(GetRandomRoom());
+        AddToMainArea(GetRandomRoom());
 
         Vector2 connectPoint;
-        while ((connectPoint = GetRandomConectPointContiguousMainZone()) != Vector2.zero)
-            ConnectZoneAndChangeConnectPointToConnectToMainZoneByConnectPoint(connectPoint);
+        while ((connectPoint = GetRandomConectPointContiguousMainArea()) != Vector2.zero)
+            ConnectAreaAndChangeConnectPointToConnectToMainAreaByConnectPoint(connectPoint);
     }
 
-    void AddToMainZone(Zone zone)
+    void AddToMainArea(Area area)
     {
-        _mainZone.AddRange(zone.GetQuads());
+        _mainArea.AddRange(area.GetQuads());
     }
 
     Room GetRandomRoom()
@@ -433,7 +433,7 @@ public class DungeonSpowner
     /// 随机获取一个与主区域相邻的生成点，如果获取不到则返回 Vector2.zero
     /// </summary>
     /// <returns></returns>
-    Vector2 GetRandomConectPointContiguousMainZone()
+    Vector2 GetRandomConectPointContiguousMainArea()
     {
         /*
          *  获取所有与主区域相邻的生成点
@@ -443,27 +443,27 @@ public class DungeonSpowner
          *  else
          *      zero
          */
-        List<Vector2> connectsContiguousMainZone = GetConnectPointsContiguousMainZone();
+        List<Vector2> connectsContiguousMainArea = GetConnectPointsContiguousMainArea();
 
-        if (connectsContiguousMainZone.Count > 0)
-            return connectsContiguousMainZone[Random.Range(0, connectsContiguousMainZone.Count)];
+        if (connectsContiguousMainArea.Count > 0)
+            return connectsContiguousMainArea[Random.Range(0, connectsContiguousMainArea.Count)];
         else
             return Vector2.zero;
     }
 
-    List<Vector2> GetConnectPointsContiguousMainZone()
+    List<Vector2> GetConnectPointsContiguousMainArea()
     {
         /*
          *  遍历所有主区域地块
          *      获取地块相邻的连接点并以不重复的方式加入到列表里
          */
-        HashSet<Vector2> connectPointsContiguousMainZone = new HashSet<Vector2>();
+        HashSet<Vector2> connectPointsContiguousMainArea = new HashSet<Vector2>();
 
-        foreach (Quad quad in _mainZone)
-            connectPointsContiguousMainZone.UnionWith(GetContiguousConnectPoints(quad.position));
+        foreach (Quad quad in _mainArea)
+            connectPointsContiguousMainArea.UnionWith(GetContiguousConnectPoints(quad.position));
         //UnionWith(IEnumerable)：将参数 IEnumerable 里的元素合并进调用的 Set 里，相当于Set版的AddRange
 
-        return new List<Vector2>(connectPointsContiguousMainZone);
+        return new List<Vector2>(connectPointsContiguousMainArea);
     }
 
     List<Vector2> GetContiguousConnectPoints(Vector2 center)
@@ -476,7 +476,7 @@ public class DungeonSpowner
         List<Vector2> connectPoints = new List<Vector2>();
 
         foreach (Quad quad in GetContiguousQuads(center))
-            if (_connectPointMap.IsConnectToUnconnectedZone(quad.position))
+            if (_connectPointMap.IsConnectToUnconnectedArea(quad.position))
                 connectPoints.Add(quad.position);
 
         return connectPoints;
@@ -498,7 +498,7 @@ public class DungeonSpowner
         return quads;
     }
 
-    void ConnectZoneAndChangeConnectPointToConnectToMainZoneByConnectPoint(Vector2 connectPoint)
+    void ConnectAreaAndChangeConnectPointToConnectToMainAreaByConnectPoint(Vector2 connectPoint)
     {
         /*
          *  连接点应该最多相邻两个空地（一层厚的墙，墙是连接点，两边是地块。地图生成原理决定空地夹角不能生成连接点），其中最多一个是主区域地块（两边都是主区域的生成点要清理掉）
@@ -506,23 +506,23 @@ public class DungeonSpowner
          *  根据连接点获取方向
          *  根据连接点和方向连接到下一个区域
          */
-        Vector2 mainZoneQuadPosition = GetContiguousMainZoneQuad(connectPoint).position;
-        ConnectZoneAndChangeConnectPointToConnectToMainZoneByConnectPointAndDirection(connectPoint, (connectPoint - mainZoneQuadPosition));
+        Vector2 mainAreaQuadPosition = GetContiguousMainAreaQuad(connectPoint).position;
+        ConnectAreaAndChangeConnectPointToConnectToMainAreaByConnectPointAndDirection(connectPoint, (connectPoint - mainAreaQuadPosition));
     }
 
-    void ConnectZoneAndChangeConnectPointToConnectToMainZoneByConnectPointAndDirection(Vector2 connectPoint, Vector2 direction)
+    void ConnectAreaAndChangeConnectPointToConnectToMainAreaByConnectPointAndDirection(Vector2 connectPoint, Vector2 direction)
     {
         /*
          *  打穿墙
          *  新的区域的地块加入到主区域
          *  清理新区域的连接点
          */
-        Zone newZone = BreakWallAndReturnNewZone(connectPoint, direction);
-        AddToMainZone(newZone);
-        ChangeAZoneConnectPointToConnectToMainZone(newZone);
+        Area newArea = BreakWallAndReturnNewArea(connectPoint, direction);
+        AddToMainArea(newArea);
+        ChangeAAreaConnectPointToConnectToMainArea(newArea);
     }
 
-    Zone BreakWallAndReturnNewZone(Vector2 connectPoint, Vector2 direction)
+    Area BreakWallAndReturnNewArea(Vector2 connectPoint, Vector2 direction)
     {
         /*
          *  一直向前走
@@ -533,10 +533,10 @@ public class DungeonSpowner
          */
         for (Vector2 currentPosition = connectPoint; ; currentPosition += direction)
         {
-            if (_connectPointMap.IsConnectToUnconnectedZone(currentPosition))
+            if (_connectPointMap.IsConnectToUnconnectedArea(currentPosition))
                 BreakWallAndClearConnectPoint(currentPosition);
             else
-                return GetZone(_map.GetQuad(currentPosition));
+                return GetArea(_map.GetQuad(currentPosition));
         }
     }
 
@@ -546,7 +546,7 @@ public class DungeonSpowner
         _connectPointMap.ChangeConnectPointToUsed(position); // TODO：这里要改为直接将状态改为使用完毕，已修改，可能有bug
     }
 
-    Zone GetZone(Quad quad)
+    Area GetArea(Quad quad)
     {
         foreach (Room room in _rooms)
             if (room.Contains(quad))
@@ -559,35 +559,35 @@ public class DungeonSpowner
         throw new System.ArgumentException("传入的地块 " + quad.quadType + "," + quad.position + " 不属于任何房间或迷宫，与设计严重不符");
     }
 
-    void ChangeAZoneConnectPointToConnectToMainZone(Zone zone)
+    void ChangeAAreaConnectPointToConnectToMainArea(Area area)
     {
         /*
          *  遍历所有地块
          *      清理一个地块的连接点
          */
-        foreach (Quad quad in zone.GetQuads())
-            ChangeAQuadConnectPointToConnectToMainZone(quad);
+        foreach (Quad quad in area.GetQuads())
+            ChangeAQuadConnectPointToConnectToMainArea(quad);
     }
 
-    void ChangeAQuadConnectPointToConnectToMainZone(Quad quad)
+    void ChangeAQuadConnectPointToConnectToMainArea(Quad quad)
     {
-        ChangeAQuadConnectPointToConnectToMainZoneWithDirection(quad, Vector2.up);
-        ChangeAQuadConnectPointToConnectToMainZoneWithDirection(quad, Vector2.right);
-        ChangeAQuadConnectPointToConnectToMainZoneWithDirection(quad, Vector2.down);
-        ChangeAQuadConnectPointToConnectToMainZoneWithDirection(quad, Vector2.left);
+        ChangeAQuadConnectPointToConnectToMainAreaWithDirection(quad, Vector2.up);
+        ChangeAQuadConnectPointToConnectToMainAreaWithDirection(quad, Vector2.right);
+        ChangeAQuadConnectPointToConnectToMainAreaWithDirection(quad, Vector2.down);
+        ChangeAQuadConnectPointToConnectToMainAreaWithDirection(quad, Vector2.left);
     }
 
-    void ChangeAQuadConnectPointToConnectToMainZoneWithDirection(Quad quad, Vector2 direction)
+    void ChangeAQuadConnectPointToConnectToMainAreaWithDirection(Quad quad, Vector2 direction)
     {
         /*
          *  if(可以清除)
          *      DO
          */
-        if (CanChangeConnectPointToConnectToMainZone(quad, direction))
-            DoChangeAQuadConnectPointWithDirectionToConnectToMainZone(quad, direction);
+        if (CanChangeConnectPointToConnectToMainArea(quad, direction))
+            DoChangeAQuadConnectPointWithDirectionToConnectToMainArea(quad, direction);
     }
 
-    bool CanChangeConnectPointToConnectToMainZone(Quad quad, Vector2 direction)
+    bool CanChangeConnectPointToConnectToMainArea(Quad quad, Vector2 direction)
     {
         /*
          *  一直朝前走，直到不是生成点的位置
@@ -599,31 +599,31 @@ public class DungeonSpowner
          */
         Vector2 currentPosition = quad.position + direction;
 
-        while (_connectPointMap.IsConnectToUnconnectedZone(currentPosition))
+        while (_connectPointMap.IsConnectToUnconnectedArea(currentPosition))
             currentPosition += direction;
 
-        return _mainZone.Contains(_map.GetQuad(currentPosition));
+        return _mainArea.Contains(_map.GetQuad(currentPosition));
     }
 
-    void DoChangeAQuadConnectPointWithDirectionToConnectToMainZone(Quad quad, Vector2 direction)
+    void DoChangeAQuadConnectPointWithDirectionToConnectToMainArea(Quad quad, Vector2 direction)
     {
         /*
          *  一直朝前走到不是连接点的位置
          *      修改走到位置的连接点状态为连接到主区域
          */
-        for (Vector2 currentPosition = quad.position + direction; _connectPointMap.IsConnectToUnconnectedZone(currentPosition); currentPosition += direction)
-            _connectPointMap.ChangeConnectPointToConnectToMainZone(currentPosition);
+        for (Vector2 currentPosition = quad.position + direction; _connectPointMap.IsConnectToUnconnectedArea(currentPosition); currentPosition += direction)
+            _connectPointMap.ChangeConnectPointToConnectToMainArea(currentPosition);
     }
 
-    Quad GetContiguousMainZoneQuad(Vector2 center)
+    Quad GetContiguousMainAreaQuad(Vector2 center)
     {
-        if (_mainZone.Contains(_map.GetQuad(center + Vector2.up)))
+        if (_mainArea.Contains(_map.GetQuad(center + Vector2.up)))
             return _map.GetQuad(center + Vector2.up);
-        if (_mainZone.Contains(_map.GetQuad(center + Vector2.right)))
+        if (_mainArea.Contains(_map.GetQuad(center + Vector2.right)))
             return _map.GetQuad(center + Vector2.right);
-        if (_mainZone.Contains(_map.GetQuad(center + Vector2.down)))
+        if (_mainArea.Contains(_map.GetQuad(center + Vector2.down)))
             return _map.GetQuad(center + Vector2.down);
-        if (_mainZone.Contains(_map.GetQuad(center + Vector2.left)))
+        if (_mainArea.Contains(_map.GetQuad(center + Vector2.left)))
             return _map.GetQuad(center + Vector2.left);
 
         return null;

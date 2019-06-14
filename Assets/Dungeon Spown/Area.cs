@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface Zone
+public interface Area
 {
     Quad[] GetQuads();
     bool Contains(Quad quad);

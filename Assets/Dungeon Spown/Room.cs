@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Room : Zone
+public class Room : Area
 {
     Quad[,] _quads;
     Rect _rect;

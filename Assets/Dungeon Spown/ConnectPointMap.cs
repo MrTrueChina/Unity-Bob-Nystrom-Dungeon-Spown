@@ -11,11 +11,11 @@ public enum ConnectPointState
     /// <summary>
     /// 连接到没有连接到的区域
     /// </summary>
-    ConnectToUnconnectedZone = 1,
+    ConnectToUnconnectedArea = 1,
     /// <summary>
     /// 连接到已经连接的区域，但还可以在开多个门的时候使用
     /// </summary>
-    ConnectToMainZone = 2,
+    ConnectToMainArea = 2,
     /// <summary>
     /// 连接到已经连接的区域，并且已经在开多个门时使用或所在位置的墙已经被打通，不再进行使用
     /// </summary>
@@ -34,12 +34,12 @@ public class ConnectPointMap
     public void AddConnectPoint(Vector2 position)
     {
         //地图生成过程中只会生成一次连接点，就是在开始连接之前，所以添加连接点的操作就是把连接点状态设为连接到未连接区域
-        _connectPoints[(int)position.x, (int)position.y] = ConnectPointState.ConnectToUnconnectedZone;
+        _connectPoints[(int)position.x, (int)position.y] = ConnectPointState.ConnectToUnconnectedArea;
     }
 
-    public void ChangeConnectPointToConnectToMainZone(Vector2 position)
+    public void ChangeConnectPointToConnectToMainArea(Vector2 position)
     {
-        _connectPoints[(int)position.x, (int)position.y] = ConnectPointState.ConnectToMainZone;
+        _connectPoints[(int)position.x, (int)position.y] = ConnectPointState.ConnectToMainArea;
     }
 
     public void ChangeConnectPointToUsed(Vector2 position)
@@ -47,8 +47,8 @@ public class ConnectPointMap
         _connectPoints[(int)position.x, (int)position.y] = ConnectPointState.Used;
     }
 
-    public bool IsConnectToUnconnectedZone(Vector2 position)
+    public bool IsConnectToUnconnectedArea(Vector2 position)
     {
-        return _connectPoints[(int)position.x, (int)position.y] == ConnectPointState.ConnectToUnconnectedZone;
+        return _connectPoints[(int)position.x, (int)position.y] == ConnectPointState.ConnectToUnconnectedArea;
     }
 }
