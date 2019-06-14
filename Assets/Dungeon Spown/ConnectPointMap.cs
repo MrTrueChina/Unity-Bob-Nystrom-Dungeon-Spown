@@ -17,7 +17,7 @@ public enum ConnectPointState
     /// </summary>
     ConnectToMainZone = 2,
     /// <summary>
-    /// 连接到已经连接的区域，并且已经在开多个门时使用，不再进行使用
+    /// 连接到已经连接的区域，并且已经在开多个门时使用或所在位置的墙已经被打通，不再进行使用
     /// </summary>
     Used = 3,
 }
@@ -40,6 +40,11 @@ public class ConnectPointMap
     public void ChangeConnectPointToConnectToMainZone(Vector2 position)
     {
         _connectPoints[(int)position.x, (int)position.y] = ConnectPointState.ConnectToMainZone;
+    }
+
+    public void ChangeConnectPointToUsed(Vector2 position)
+    {
+        _connectPoints[(int)position.x, (int)position.y] = ConnectPointState.Used;
     }
 
     public bool IsConnectToUnconnectedZone(Vector2 position)
