@@ -302,12 +302,12 @@ public class DungeonSpowner
          *  初始化连接点地图
          *  生成连接点
          *  进行连接
-         *  进行额外的连接
+         *  进行额外的连接（开更多门）
          */
         SetupConnectPointMap();
         SpownConnectPoints();
         DoConnect();
-        ///TODO：进行额外的连接
+        DoExtraConnect();
     }
 
     void SetupConnectPointMap()
@@ -415,7 +415,7 @@ public class DungeonSpowner
         AddToMainArea(GetRandomRoom());
 
         Vector2 connectPoint;
-        while ((connectPoint = GetRandomConectPointContiguousMainArea()) != Vector2.zero)
+        while ((connectPoint = GetRandomConectPointContiguousMainAreaConnectMainArea()) != Vector2.zero)
             ConnectAreaAndChangeConnectPointToConnectToMainAreaByConnectPoint(connectPoint);
     }
 
@@ -433,7 +433,7 @@ public class DungeonSpowner
     /// 随机获取一个与主区域相邻的生成点，如果获取不到则返回 Vector2.zero
     /// </summary>
     /// <returns></returns>
-    Vector2 GetRandomConectPointContiguousMainArea()
+    Vector2 GetRandomConectPointContiguousMainAreaConnectMainArea()
     {
         /*
          *  获取所有与主区域相邻的生成点
@@ -443,7 +443,7 @@ public class DungeonSpowner
          *  else
          *      zero
          */
-        List<Vector2> connectsContiguousMainArea = GetConnectPointsContiguousMainArea();
+        List<Vector2> connectsContiguousMainArea = GetConnectPointsContiguousMainAreaConnectToMainArea();
 
         if (connectsContiguousMainArea.Count > 0)
             return connectsContiguousMainArea[Random.Range(0, connectsContiguousMainArea.Count)];
@@ -451,7 +451,7 @@ public class DungeonSpowner
             return Vector2.zero;
     }
 
-    List<Vector2> GetConnectPointsContiguousMainArea()
+    List<Vector2> GetConnectPointsContiguousMainAreaConnectToMainArea()
     {
         /*
          *  遍历所有主区域地块
@@ -460,13 +460,13 @@ public class DungeonSpowner
         HashSet<Vector2> connectPointsContiguousMainArea = new HashSet<Vector2>();
 
         foreach (Quad quad in _mainArea)
-            connectPointsContiguousMainArea.UnionWith(GetContiguousConnectPoints(quad.position));
+            connectPointsContiguousMainArea.UnionWith(GetContiguousConnectPointsConnectToMainArea(quad.position));
         //UnionWith(IEnumerable)：将参数 IEnumerable 里的元素合并进调用的 Set 里，相当于Set版的AddRange
 
         return new List<Vector2>(connectPointsContiguousMainArea);
     }
 
-    List<Vector2> GetContiguousConnectPoints(Vector2 center)
+    List<Vector2> GetContiguousConnectPointsConnectToMainArea(Vector2 center)
     {
         /*
          *  遍历相邻地块
@@ -629,7 +629,40 @@ public class DungeonSpowner
         return null;
     }
 
-    //TODO：一个进行额外的连接的方法
+    void DoExtraConnect()
+    {
+        /*
+         *  遍历所有房间
+         *      进行这个房间的额外连接
+         */
+        foreach (Room room in _rooms)
+            ExtraConnectARoom(room);
+    }
+
+    void ExtraConnectARoom(Room room)
+    {
+        /*
+         *  获取连接数
+         *  
+         *  循环连接次数()
+         *      进行一次额外连接
+         */
+        int extraConnectTime = _spownData.GetRoomDoorNumber();
+
+        for (int i = 1; i < extraConnectTime; i++) // 进行额外连接前所有房间都有至少一个门，所以从1开始
+            DoAnExtraConnect(room);
+    }
+
+    void DoAnExtraConnect(Room room)
+    {
+        /*
+         *  随机获取房间相邻的一个连接到主区域的连接点
+         *  跟着这个连接点连接到主区域（不需要清理连接点）
+         *  清理这个房间相邻的所有连接点
+         */
+        //TODO：进行一次额外连接
+    }
+
 
     void Uncarve()
     {
